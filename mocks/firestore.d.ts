@@ -27,6 +27,12 @@ interface FirestoreBatch {
   commit(): Promise<void>;
 }
 
+interface FirestoreBulkWriter {
+  delete(doc: DocumentReference, options?: SetOptions): FirestoreBulkWriter;
+  set(doc: DocumentReference, data: DocumentData, options?: SetOptions): FirestoreBulkWriter;
+  close(): Promise<void>;
+}
+
 export type FakeFirestoreDatabase = DatabaseCollections;
 
 export class FakeFirestore {
@@ -48,6 +54,7 @@ export class FakeFirestore {
 
   getAll(): Array<MockedQuerySnapshot>;
   batch(): FirestoreBatch;
+  bulkWriter(): FirestoreBulkWriter;
   settings(): void;
   useEmulator(): void;
   collection(collectionName: string): CollectionReference;
@@ -117,6 +124,7 @@ declare class CollectionReference extends FakeFirestore.Query {
 // Mocks exported from this module
 export const mockBatch: jest.Mock;
 export const mockRunTransaction: jest.Mock;
+export const mockBulkWriter: jest.Mock;
 
 export const mockCollection: jest.Mock;
 export const mockCollectionGroup: jest.Mock;
@@ -171,3 +179,9 @@ export const mockSetTransaction: jest.Mock;
 export const mockUpdateTransaction: jest.Mock;
 export const mockDeleteTransaction: jest.Mock;
 export const mockCreateTransaction: jest.Mock;
+
+// Mocks exported from BulkWriter
+export const mockBulkWriterSet: jest.Mock;
+export const mockBulkWriterDelete: jest.Mock;
+export const mockBulkWriterClose: jest.Mock;
+export const mockBulkWriterUpdate: jest.Mock;

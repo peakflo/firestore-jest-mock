@@ -19,6 +19,11 @@ describe.each([
     mockBatchDelete,
     mockBatchUpdate,
     mockBatchSet,
+    mockBulkWriter,
+    mockBulkWriterSet,
+    mockBulkWriterClose,
+    mockBulkWriterDelete,
+    mockBulkWriterUpdate,
     mockSettings,
     mockOnSnapShot,
     mockListCollections,
@@ -210,6 +215,34 @@ describe.each([
             expect(value.updateTime).toStrictEqual(now);
             expect(mockUpdate).toHaveBeenCalledWith({ capital: true });
           });
+      });
+
+      test('bulk writes', () => {
+        const firestore = new this.Firestore();
+
+        // Get a new bulk writer
+        const bulkWriter = firestore.bulkWriter();
+
+        // Set the value of 'NYC'
+        const nycRef = firestore.collection('cities').doc('NYC');
+        bulkWriter.set(nycRef, { name: 'New York City' });
+
+        // Update the population of 'SF'
+        const sfRef = firestore.collection('cities').doc('SF');
+        bulkWriter.update(sfRef, { population: 1000000 });
+
+        // Delete the city 'LA'
+        const laRef = firestore.collection('cities').doc('LA');
+        bulkWriter.delete(laRef);
+
+        // Commit the bulk Writer
+        return bulkWriter.close().then(function() {
+          expect(mockBulkWriter).toHaveBeenCalled();
+          expect(mockBulkWriterDelete).toHaveBeenCalledWith(laRef);
+          expect(mockBulkWriterUpdate).toHaveBeenCalledWith(sfRef, { population: 1000000 });
+          expect(mockBulkWriterSet).toHaveBeenCalledWith(nycRef, { name: 'New York City' });
+          expect(mockBulkWriterClose).toHaveBeenCalled();
+        });
       });
 
       test('batch writes', () => {
