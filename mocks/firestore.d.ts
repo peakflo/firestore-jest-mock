@@ -30,6 +30,7 @@ interface FirestoreBatch {
 interface FirestoreBulkWriter {
   delete(doc: DocumentReference, options?: SetOptions): FirestoreBulkWriter;
   set(doc: DocumentReference, data: DocumentData, options?: SetOptions): FirestoreBulkWriter;
+  update(doc: DocumentReference, data: DocumentData): FirestoreBulkWriter;
   close(): Promise<void>;
 }
 
