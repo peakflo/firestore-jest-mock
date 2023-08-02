@@ -1,5 +1,6 @@
 const mockCollectionGroup = jest.fn();
 const mockBatch = jest.fn();
+const mockBulkWriter = jest.fn();
 const mockRunTransaction = jest.fn();
 
 const mockSettings = jest.fn();
@@ -17,6 +18,11 @@ const mockBatchDelete = jest.fn();
 const mockBatchCommit = jest.fn();
 const mockBatchUpdate = jest.fn();
 const mockBatchSet = jest.fn();
+
+const mockBulkWriterSet = jest.fn();
+const mockBulkWriterDelete = jest.fn();
+const mockBulkWriterClose = jest.fn();
+const mockBulkWriterUpdate = jest.fn();
 
 const mockOnSnapShot = jest.fn();
 
@@ -52,6 +58,31 @@ class FakeFirestore {
     params = params.filter(arg => arg instanceof FakeFirestore.DocumentReference);
 
     return Promise.all(transaction.mocks.mockGetAll(...params) || [...params].map(r => r.get()));
+  }
+
+  bulkWriter() {
+    mockBulkWriter(...arguments);
+    return {
+      _ref: this,
+      delete() {
+        mockBulkWriterDelete(...arguments);
+        return this;
+      },
+      set(doc, data, setOptions = {}) {
+        mockBulkWriterSet(...arguments);
+        this._ref._updateData(doc.path, data, setOptions.merge);
+        return this;
+      },
+      update(doc, data) {
+        mockBulkWriterUpdate(...arguments);
+        this._ref._updateData(doc.path, data, true);
+        return this;
+      },
+      close() {
+        mockBulkWriterClose(...arguments);
+        return Promise.resolve();
+      },
+    };
   }
 
   batch() {
@@ -554,6 +585,11 @@ module.exports = {
   mockOnSnapShot,
   mockListDocuments,
   mockListCollections,
+  mockBulkWriter,
+  mockBulkWriterClose,
+  mockBulkWriterDelete,
+  mockBulkWriterSet,
+  mockBulkWriterUpdate,
   ...query.mocks,
   ...transaction.mocks,
   ...fieldValue.mocks,
